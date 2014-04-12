@@ -55,11 +55,11 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     public void init() {
-        try {
+        /*try {
             openConnection();
         } catch (IOException e) {
             System.out.println("Exception occurred at initializing the client. " + e);
-        }
+        }*/
     }
 
     //Instance methods ************************************************

@@ -22,7 +22,7 @@ public class ClientConsole extends AbstractConsole {
     /**
      * The default port to connect on.
      */
-    final public static int DEFAULT_PORT = 5555;
+    final public static int DEFAULT_PORT = 5500;
 
     //Instance variables **********************************************
 

@@ -34,10 +34,10 @@ public class SignUpValidator implements Validator {
         }
     }
 
-    private ClientDetails createClientDetails(ConnectionToClient client,
+    private ClientDetails createClientDetails(ConnectionToClient connectionToClient,
                                               String userId,
                                               String password) {
-        return new ClientDetails(client.getInetAddress().getHostAddress(), userId, password);
+        return new ClientDetails(connectionToClient.getInetAddress().getHostAddress(), userId, password,false,connectionToClient);
     }
 
     public static class SignUpValidatorResult extends ValidateResult {

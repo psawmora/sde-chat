@@ -178,11 +178,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                     System.out.println(
                             "Exception in sending messages to the client[ " + client.getInetAddress().getHostAddress() + "]");
                 } finally {
-                    try {
-                        client.close();
-                    } catch (IOException e) {
-
-                    }
+//
                 }
             } else {
                 System.out.println("User Message: " + msg + " from " + loginId);
@@ -260,6 +256,10 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     public void putClientDetails(String userId, ClientDetails details) {
         clientDetailsContainer.put(userId, details);
+    }
+
+    public Map<String, ClientDetails> getClientDetailsContainer() {
+        return clientDetailsContainer;
     }
 
     public boolean isContainsClientDetails(String userId) {
