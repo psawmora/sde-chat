@@ -57,23 +57,18 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     public void init() {
         try {
             openConnection();
-            sendLoginDetails();
         } catch (IOException e) {
             System.out.println("Exception occurred at initializing the client. " + e);
         }
     }
 
-    private void sendLoginDetails() throws IOException {
-        sendToServer("#login " + loginId);
-    }
-
     //Instance methods ************************************************
-
 
     @Override
     protected void connectionClosed() {
         clientUI.display("Client Connection Closed");
     }
+
 
     @Override
     protected void connectionException(Exception e) {
@@ -130,7 +125,7 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
                 setUpPort(params);
                 break;
             case LOG_IN:
-                login();
+                login(params);
                 break;
             case GET_HOST:
                 clientUI.display("Host is : " + getHost());
@@ -145,8 +140,9 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     private void signUp(String[] params) {
-        if (params != null && params.length >= 3) {
+        if (params != null && params.length >= 4) {
             try {
+                openConnection();
                 sendSignUpMessage(params);
             } catch (Exception e) {
                 System.out.println("Error in signing up: [" + getPort() + "] : [" + getHost() + "] " + e);
@@ -157,24 +153,40 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     private void sendSignUpMessage(String[] params) throws IOException {
-        StringBuffer request = new StringBuffer("#signup ").
-                append(params[0]).
+        StringBuffer request = new StringBuffer(params[0]).
+                append(" ").
+                append(params[1]).
+                append(" ").
+                append(params[2]).
+                append(" ").
+                append(params[3]);
+        sendToServer(request.toString());
+    }
+
+    private void login(String[] params) {
+        if (params != null && params.length >= 3) {
+            try {
+                boolean isConnected = isConnected();
+                openConnection();
+                sendLoginDetails(params);
+                if (!isConnected) {
+                    clientUI.display("Connected to the server port[" + getPort() + "]");
+                }
+            } catch (Exception e) {
+                System.out.println("Error in logging to the server : [" + getPort() + "] : [" + getHost() + "] " + e);
+            }
+        } else {
+            clientUI.display("Incorrect number of parameters for logging");
+        }
+    }
+
+    private void sendLoginDetails(String[] params) throws IOException {
+        StringBuffer request = new StringBuffer(params[0]).
                 append(" ").
                 append(params[1]).
                 append(" ").
                 append(params[2]);
         sendToServer(request.toString());
-    }
-
-    private void login() {
-        try {
-            openConnection();
-            sendLoginDetails();
-            clientUI.display("Logged in and connected to the server port[" + getPort() + "]");
-        } catch (IOException e) {
-            System.out.println("Error in establishing connection to the server : [" + getPort() + "] : [" + getHost() + "] " + e);
-        }
-
     }
 
     private void setUpPort(String[] args) {

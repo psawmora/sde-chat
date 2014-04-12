@@ -4,10 +4,13 @@ package msc.sde.chat.server;// This file contains material supporting section 3.
 
 import msc.sde.chat.service.ConsoleObserver;
 import msc.sde.chat.service.display.ChatIF;
+import msc.sde.chat.util.*;
 import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static msc.sde.chat.util.Operations.*;
 
@@ -21,7 +24,7 @@ import static msc.sde.chat.util.Operations.*;
  * @author Paul Holden
  * @version July 2000
  */
-public class EchoServer extends AbstractServer implements ConsoleObserver{
+public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     //Class variables *************************************************
 
@@ -31,6 +34,12 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
     final public static int DEFAULT_PORT = 5500;
 
     private ChatIF serverUi;
+
+    private Validator signUpValidator;
+
+    private Validator loginValidator;
+
+    private Map<String, ClientDetails> clientDetailsContainer;
 
     //Constructors ****************************************************
 
@@ -42,6 +51,9 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
     public EchoServer(int port, ChatIF serverUi) {
         super(port);
         this.serverUi = serverUi;
+        this.clientDetailsContainer = new HashMap<>();
+        this.signUpValidator = new SignUpValidator();
+        this.loginValidator = new LoginValidator();
     }
 
     @Override
@@ -93,12 +105,10 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
 
     }
 
-    private void setUpLoginDetail(ConnectionToClient client, String id) {
-        if (id == null || id.isEmpty()) {
-            serverUi.display("No id to register");
-            return;
-        }
-        client.setInfo("loginId", id);
+    private void loginClient(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult result = loginValidator.validate(this, client, params);
+        client.sendToClient(result.getReturnMsg());
+
     }
 
     private void startIfNot() {
@@ -156,8 +166,8 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
      * @param client The connection from which the message originated.
      */
     public void handleMessageFromClient(Object msg, ConnectionToClient client) {
-        System.out.println("Message received: " + msg + " from " + client);
         if (msg instanceof String && ((String) msg).startsWith("#")) {
+            System.out.println("User Command: " + msg + " from " + client);
             handleClientCommand(client, (String) msg);
         } else {
             String loginId = (String) client.getInfo("loginId");
@@ -175,6 +185,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
                     }
                 }
             } else {
+                System.out.println("User Message: " + msg + " from " + loginId);
                 StringBuffer newMsg = new StringBuffer(loginId).append(">").append(msg);
                 sendToAllClients(newMsg.toString());
             }
@@ -183,10 +194,31 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
     }
 
     private void handleClientCommand(ConnectionToClient client, String msg) {
-        String[] cmnd = msg.split(" ");
-        if (cmnd.length > 0 && cmnd[0].substring(1).equals("login")) {
-            setUpLoginDetail(client, cmnd[1]);
+        String[] params = msg.split(" ");
+        String command;
+        try {
+            if (params.length > 0 && (command = params[0].substring(1)) != null) {
+                switch (command) {
+                    case SIGN_UP:
+                        signUpClient(client, params);
+                        break;
+                    case LOG_IN:
+                        loginClient(client, params);
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Unexpected exception occurred while processing client message " + e);
         }
+    }
+
+    private void signUpClient(ConnectionToClient client, String[] params) throws IOException {
+        SignUpValidator.SignUpValidatorResult result =
+                (SignUpValidator.SignUpValidatorResult) signUpValidator.validate(this, client, params);
+        if (result.isValid()) {
+            putClientDetails(result.getClientDetails().getUserId(), result.getClientDetails());
+        }
+        client.sendToClient(result.getReturnMsg());
     }
 
     /**
@@ -221,5 +253,18 @@ public class EchoServer extends AbstractServer implements ConsoleObserver{
                         "] disconnected from the server");
 
     }
+
+    public ClientDetails getClientDetails(String userId) {
+        return clientDetailsContainer.get(userId);
+    }
+
+    public void putClientDetails(String userId, ClientDetails details) {
+        clientDetailsContainer.put(userId, details);
+    }
+
+    public boolean isContainsClientDetails(String userId) {
+        return clientDetailsContainer.containsKey(userId);
+    }
+
 }
 //End of EchoServer class
