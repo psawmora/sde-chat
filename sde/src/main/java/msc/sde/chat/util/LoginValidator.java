@@ -14,7 +14,7 @@ public class LoginValidator implements Validator {
             String userId = params[1];
             String password = params[2];
             ClientDetails clientDetails = server.getClientDetails(userId);
-            if (clientDetails != null && password.equals(clientDetails.getPassword())) {
+            if (clientDetails != null && !clientDetails.isLoggedIn() && password.equals(clientDetails.getPassword())) {
                 client.setInfo("isLoggedIn", true);
                 client.setInfo("loginId", userId);
                 clientDetails.setLoggedIn(true);
