@@ -28,6 +28,11 @@ public class LoginValidator implements Validator {
         }
     }
 
+    @Override
+    public ValidateResult validate(EchoServer server, ConnectionToClient client, String[] params, boolean removeForwarding) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public static class LoginValidatorResult extends ValidateResult {
 
         public LoginValidatorResult(boolean valid, String returnMsg) {

@@ -10,4 +10,5 @@ public interface Validator {
 
     ValidateResult validate(EchoServer server, ConnectionToClient client, String... params);
 
+    ValidateResult validate(EchoServer server, ConnectionToClient client, String[] params, boolean removeForwarding);
 }

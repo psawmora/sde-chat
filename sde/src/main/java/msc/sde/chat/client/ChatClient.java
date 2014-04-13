@@ -162,17 +162,67 @@ public class ChatClient implements Observer, Console {
             case RESIGN_FROM_GROUP:
                 resignFromGroup(params);
                 break;
+            case DELETE_GROUP:
+                deleteGroup(params);
+                break;
             case GET_HOST:
                 clientUI.display("Host is : " + client.getHost());
                 break;
             case GET_PORT:
                 clientUI.display("Port is : " + client.getPort());
                 break;
+            case FORWARD:
+                forward(params);
+                break;
+            case REMOVE_FORWARD:
+                removeForward(params);
+                break;
             default:
                 clientUI.display("Wrong command");
                 break;
         }
     }
+
+    private void removeForward(String[] params) {
+        if (isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void deleteGroup(String[] params) {
+        if (isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void forward(String[] params) {
+        if (isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private void resignFromGroup(String[] params) {
         if (client.isConnected()) {
