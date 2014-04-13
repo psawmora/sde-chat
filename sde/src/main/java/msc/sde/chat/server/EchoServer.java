@@ -2,19 +2,20 @@ package msc.sde.chat.server;// This file contains material supporting section 3.
 // "Object Oriented Software Engineering" and is issued under the open-source
 // license found at www.lloseng.com 
 
-import msc.sde.chat.service.ConsoleObserver;
+import msc.sde.chat.service.Console;
 import msc.sde.chat.service.display.ChatIF;
 import msc.sde.chat.service.send.SenderService;
 import msc.sde.chat.service.send.impl.PrivateMsgSenderService;
 import msc.sde.chat.service.group.GroupManager;
 import msc.sde.chat.service.send.BroadcastSenderService;
 import msc.sde.chat.util.*;
-import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import static msc.sde.chat.util.Operations.*;
 
@@ -28,7 +29,7 @@ import static msc.sde.chat.util.Operations.*;
  * @author Paul Holden
  * @version July 2000
  */
-public class EchoServer extends AbstractServer implements ConsoleObserver {
+public class EchoServer implements Observer, Console {
 
     //Class variables *************************************************
 
@@ -55,6 +56,8 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     private GroupManager groupManager;
 
+    private ModifiedObservableServer server;
+
     //Constructors ****************************************************
 
     /**
@@ -63,7 +66,8 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
      * @param port The port number to connect on.
      */
     public EchoServer(int port, ChatIF serverUi) {
-        super(port);
+        server = new ModifiedObservableServer(port);
+        server.addObserver(this);
         this.serverUi = serverUi;
         this.clientDetailsContainer = new HashMap<>();
         this.signUpValidator = new SignUpValidator();
@@ -76,8 +80,44 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
     }
 
     @Override
-    public void init() {
+    public void update(Observable o, Object arg) {
+        System.out.println("Updated oberver method..." + arg);
+        if(arg instanceof ModifiedObservableServer.Message) {
+            ModifiedObservableServer.Message message = (ModifiedObservableServer.Message) arg;
+            switch (message.getFunctionName()) {
+                case ModifiedObservableServer.CLIENT_CONNECTED:
+                    clientConnected(message.getClient());
+                    break;
+                case ModifiedObservableServer.CLIENT_DISCONNECTED:
+                    clientDisconnected(message.getClient());
+                    break;
+                case ModifiedObservableServer.CLIENT_EXCEPTION:
+                    clientException(message.getClient(), message.getException());
+                    break;
+                case ModifiedObservableServer.LISTENING_EXCEPTION:
+                    break;
+                case ModifiedObservableServer.SERVER_CLOSED:
+                    break;
+                case ModifiedObservableServer.SERVER_STARTED:
+                    break;
+                case ModifiedObservableServer.SERVER_STOPPED:
+                    break;
+                default:
+                    handleMessageFromClient(message.getContent(), message.getClient());
+                    break;
+            }
+        } else {
+            System.out.println("Unknown argument type");
+        }
+    }
 
+    @Override
+    public void init() {
+        try {
+            server.listen();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     public void handleMsgFromUi(String message) {
@@ -86,7 +126,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
         } else {
             String serverMessage = "SERVER MSG> " + message;
             serverUi.display(serverMessage);
-            sendToAllClients(serverMessage);
+            server.sendToAllClients(serverMessage);
         }
     }
 
@@ -103,7 +143,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                 quit();
                 break;
             case STOP:
-                stopListening();
+                server.stopListening();
                 break;
             case CLOSE:
                 closeAllClients();
@@ -115,7 +155,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                 startIfNot();
                 break;
             case GET_PORT:
-                serverUi.display("Server Port : " + getPort());
+                serverUi.display("Server Port : " + server.getPort());
                 break;
             default:
                 serverUi.display("Wrong command");
@@ -131,25 +171,25 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
     }
 
     private void startIfNot() {
-        if (isListening()) {
-            serverUi.display("Server is already listening on port[" + getPort() + "]. Cannot start again");
+        if (server.isListening()) {
+            serverUi.display("Server is already listening on port[" + server.getPort() + "]. Cannot start again");
             return;
         }
         try {
-            listen();
+            server.listen();
         } catch (IOException e) {
-            System.out.println("Error in start listning on port[" + getPort() + " " + e);
+            System.out.println("Error in start listning on port[" + server.getPort() + " " + e);
         }
     }
 
 
     private void setUpPort(String[] args) {
-        if (isListening()) {
+        if (server.isListening()) {
             serverUi.display("Cannot set the port. Server is listening to clients already. Please close first.");
             return;
         }
         if (args != null && args.length > 1) {
-            setPort(Integer.parseInt(args[1]));
+            server.setPort(Integer.parseInt(args[1]));
         } else {
             serverUi.display("Wrong parameters for setting up the port.");
         }
@@ -157,11 +197,11 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     private void closeAllClients() {
         try {
-            Thread[] clientConnections = getClientConnections();
+            Thread[] clientConnections = server.getClientConnections();
             for (Thread client : clientConnections) {
                 ((ConnectionToClient) client).close();
             }
-            close();
+            server.close();
         } catch (Exception e) {
             System.out.println("Error in stopping the server. " + e);
         }
@@ -169,7 +209,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     private void quit() {
         try {
-            close();
+            server.close();
             serverUi.close();
         } catch (Exception e) {
             System.out.println("Error in stopping the server. " + e);
@@ -293,7 +333,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
      */
     protected void serverStarted() {
         System.out.println
-                ("Server listening for connections on port " + getPort());
+                ("Server listening for connections on port " + server.getPort());
     }
 
     /**
@@ -305,14 +345,12 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                 ("Server has stopped listening for connections.");
     }
 
-    @Override
     protected void clientConnected(ConnectionToClient client) {
         System.out.println(
                 "Client [" + client.getId() + "] from [" + client.getInetAddress().getHostAddress() +
                         "] connected to the server");
     }
 
-    @Override
     protected synchronized void clientDisconnected(ConnectionToClient client) {
         System.out.println(
                 "Client [" + client.getId() + "] from [" + client.getInetAddress().getHostAddress() +
@@ -320,7 +358,6 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     }
 
-    @Override
     protected synchronized void clientException(ConnectionToClient client, Throwable exception) {
         String id = (String) client.getInfo("loginId");
         clientDetailsContainer.get(id).setLoggedIn(false);
@@ -344,5 +381,8 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
         return userId == null ? false : clientDetailsContainer.containsKey(userId);
     }
 
+    public ModifiedObservableServer getServer() {
+        return server;
+    }
 }
 //End of EchoServer class

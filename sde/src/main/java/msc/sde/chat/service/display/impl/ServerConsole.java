@@ -18,10 +18,10 @@ public class ServerConsole extends AbstractConsole {
         }
         ServerConsole serverConsole = new ServerConsole();
         EchoServer server = new EchoServer(port, serverConsole);
-        server.setConnectionFactory(new ModifiedConnectionToClientFactory());
+        server.getServer().setConnectionFactory(new ModifiedConnectionToClientFactory());
         serverConsole.setObserver(server);
         try {
-            server.listen(); //Start listening for connections
+            server.getServer().listen(); //Start listening for connections
             serverConsole.accept();
         } catch (Exception ex) {
             System.out.println("Exception occurred. Server console stopped. " + ex);
@@ -30,6 +30,6 @@ public class ServerConsole extends AbstractConsole {
     }
 
     public void setObserver(EchoServer observer) {
-        this.observer = observer;
+        this.console = observer;
     }
 }

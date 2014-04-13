@@ -4,11 +4,13 @@
 
 package msc.sde.chat.client;
 
-import msc.sde.chat.service.ConsoleObserver;
+import msc.sde.chat.service.Console;
 import msc.sde.chat.service.display.ChatIF;
-import ocsf.client.AbstractClient;
+import ocsf.client.ObservableClient;
 
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 
 import static msc.sde.chat.util.Operations.*;
 
@@ -21,7 +23,7 @@ import static msc.sde.chat.util.Operations.*;
  * @author Fran&ccedil;ois B&eacute;langer
  * @version July 2000
  */
-public class ChatClient extends AbstractClient implements ConsoleObserver {
+public class ChatClient implements Observer, Console {
     //Instance variables **********************************************
 
     /**
@@ -32,6 +34,7 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
 
     private String loginId;
 
+    private ObservableClient client;
 
     //Constructors ****************************************************
 
@@ -48,10 +51,32 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
      * @param port     The port number to connect on.
      * @param clientUI The interface type variable.
      */
-    public ChatClient(String host, int port, ChatIF clientUI)
-            throws IOException {
-        super(host, port); //Call the superclass constructor
+    public ChatClient(String host, int port, ChatIF clientUI) throws IOException {
+        client = new ObservableClient(host, port);
         this.clientUI = clientUI;
+        client.addObserver(this);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if(arg instanceof String) {
+            String message = (String) arg;
+            switch (message) {
+                case ObservableClient.CONNECTION_ESTABLISHED:
+                    break;
+                case ObservableClient.CONNECTION_CLOSED:
+                    connectionClosed();
+                    break;
+                case ObservableClient.CONNECTION_EXCEPTION:
+                    connectionException(new Exception("Exception in connection"));
+                    break;
+                default:
+                    handleMessageFromServer(message);
+                    break;
+            }
+        } else {
+            System.out.println("Unknown argument type");
+        }
     }
 
     public void init() {
@@ -64,13 +89,11 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
 
     //Instance methods ************************************************
 
-    @Override
     protected void connectionClosed() {
         clientUI.display("Client Connection Closed");
     }
 
 
-    @Override
     protected void connectionException(Exception e) {
         clientUI.display("Exception occurred in the connection. Closing the connection. " + e);
         quit();
@@ -97,8 +120,8 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
                 if (cmnd.length > 0) {
                     handleClientCommands(cmnd[0].substring(1), cmnd);
                 }
-            } else if (isConnected()) {
-                sendToServer(message);
+            } else if (client.isConnected()) {
+                client.sendToServer(message);
             }
         } catch (IOException e) {
             clientUI.display
@@ -140,10 +163,10 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
                 resignFromGroup(params);
                 break;
             case GET_HOST:
-                clientUI.display("Host is : " + getHost());
+                clientUI.display("Host is : " + client.getHost());
                 break;
             case GET_PORT:
-                clientUI.display("Port is : " + getPort());
+                clientUI.display("Port is : " + client.getPort());
                 break;
             default:
                 clientUI.display("Wrong command");
@@ -152,12 +175,12 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     private void resignFromGroup(String[] params) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             try {
                 StringBuffer request = new StringBuffer(params[0]).
                         append(" ").
                         append(params[1]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -165,14 +188,14 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     private void assignToGroup(String[] params) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             try {
                 StringBuffer request = new StringBuffer(params[0]).
                         append(" ").
                         append(params[1]).
                         append(" ").
                         append(params[2]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -180,12 +203,12 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     private void createGroup(String[] params) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             try {
                 StringBuffer request = new StringBuffer(params[0]).
                         append(" ").
                         append(params[1]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -200,9 +223,9 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
                         append(params[1]).
                         append(" ").
                         append(params[2]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
-                System.out.println("Error in sending private message: [" + getPort() + "] : [" + getHost() + "] " + e);
+                System.out.println("Error in sending private message: [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
             }
         } else {
             clientUI.display("Incorrect number of parameters for sending private message");
@@ -212,10 +235,10 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     private void signUp(String[] params) {
         if (params != null && params.length >= 4) {
             try {
-                openConnection();
+                client.openConnection();
                 sendSignUpMessage(params);
             } catch (Exception e) {
-                System.out.println("Error in signing up: [" + getPort() + "] : [" + getHost() + "] " + e);
+                System.out.println("Error in signing up: [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
             }
         } else {
             clientUI.display("Incorrect number of parameters for signing up");
@@ -230,20 +253,20 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
                 append(params[2]).
                 append(" ").
                 append(params[3]);
-        sendToServer(request.toString());
+        client.sendToServer(request.toString());
     }
 
     private void login(String[] params) {
         if (params != null && params.length >= 3) {
             try {
-                boolean isConnected = isConnected();
-                openConnection();
+                boolean isConnected = client.isConnected();
+                client.openConnection();
                 sendLoginDetails(params);
                 if (!isConnected) {
-                    clientUI.display("Connected to the server port[" + getPort() + "]");
+                    clientUI.display("Connected to the server port[" + client.getPort() + "]");
                 }
             } catch (Exception e) {
-                System.out.println("Error in logging to the server : [" + getPort() + "] : [" + getHost() + "] " + e);
+                System.out.println("Error in logging to the server : [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
             }
         } else {
             clientUI.display("Incorrect number of parameters for logging");
@@ -256,16 +279,16 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
                 append(params[1]).
                 append(" ").
                 append(params[2]);
-        sendToServer(request.toString());
+        client.sendToServer(request.toString());
     }
 
     private void setUpPort(String[] args) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             clientUI.display("Cannot set the port. Client is connected to a server already. Please logoff first.");
             return;
         }
         if (args != null && args.length > 1) {
-            setPort(Integer.parseInt(args[1]));
+            client.setPort(Integer.parseInt(args[1]));
             clientUI.display("Set Up the port to [" + args[1] + "]");
         } else {
             clientUI.display("Wrong parameters for setting up the port.");
@@ -273,12 +296,12 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
     }
 
     private void setUpHost(String[] args) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             clientUI.display("Cannot set the host. Client is connected to a server already. Please logoff first.");
             return;
         }
         if (args != null && args.length > 1) {
-            setHost(args[1]);
+            client.setHost(args[1]);
             clientUI.display("Set Up the host to [" + args[1] + "]");
         } else {
             clientUI.display("Wrong parameters for setting up the host.");
@@ -297,7 +320,7 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
 
     private void disconnect() {
         try {
-            closeConnection();
+            client.closeConnection();
             clientUI.display("Logged off from the system");
         } catch (IOException e) {
         }

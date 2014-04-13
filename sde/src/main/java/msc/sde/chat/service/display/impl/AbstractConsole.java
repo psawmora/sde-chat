@@ -1,6 +1,6 @@
 package msc.sde.chat.service.display.impl;
 
-import msc.sde.chat.service.ConsoleObserver;
+import msc.sde.chat.service.Console;
 import msc.sde.chat.service.display.ChatIF;
 
 import java.io.BufferedReader;
@@ -15,7 +15,7 @@ public class AbstractConsole implements ChatIF {
 
     protected volatile boolean closeTerminal = false;
 
-    protected ConsoleObserver observer;
+    protected Console console;
 
     /**
      * This method overrides the method in the ChatIF interface.  It
@@ -35,7 +35,7 @@ public class AbstractConsole implements ChatIF {
             while (!closeTerminal) {
                 System.out.print(">");
                 String message = fromConsole.readLine();
-                observer.handleMsgFromUi(message);
+                console.handleMsgFromUi(message);
             }
         } catch (Exception ex) {
             System.out.println("Unexpected exception occurred while processing user input." + ex);

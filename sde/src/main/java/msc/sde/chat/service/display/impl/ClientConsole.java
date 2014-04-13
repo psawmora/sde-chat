@@ -41,7 +41,7 @@ public class ClientConsole extends AbstractConsole {
      */
     public ClientConsole(String loginId, String host, int port) {
         try {
-            observer = new ChatClient(host, port, this, loginId);
+            console = new ChatClient(host, port, this, loginId);
         } catch (IOException exception) {
             System.out.println("Error: Can't setup connection!"
                     + " Terminating client.");
@@ -75,7 +75,7 @@ public class ClientConsole extends AbstractConsole {
             port = DEFAULT_PORT;
         }
         ClientConsole chat = new ClientConsole(loginId, host, port);
-        chat.observer.init();
+        chat.console.init();
         chat.accept();  //Wait for console data
     }
 }

@@ -306,4 +306,8 @@ public class ObservableServer extends Observable
      setChanged();
      notifyObservers(message);
   }
+
+  public synchronized void setConnectionFactory(AbstractConnectionFactory connectionFactory) {
+      service.setConnectionFactory(connectionFactory);
+  }
 }

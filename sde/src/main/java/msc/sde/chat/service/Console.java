@@ -3,7 +3,7 @@ package msc.sde.chat.service;
 /**
  * @author: prabath
  */
-public interface ConsoleObserver {
+public interface Console {
 
     void init();
 
