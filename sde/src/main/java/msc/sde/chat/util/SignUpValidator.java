@@ -40,6 +40,11 @@ public class SignUpValidator implements Validator {
         return new ClientDetails(connectionToClient.getInetAddress().getHostAddress(), userId, password,false,connectionToClient);
     }
 
+    @Override
+    public ValidateResult validate(EchoServer server, ConnectionToClient client, String[] params, boolean removeForwarding) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public static class SignUpValidatorResult extends ValidateResult {
 
         private ClientDetails clientDetails;

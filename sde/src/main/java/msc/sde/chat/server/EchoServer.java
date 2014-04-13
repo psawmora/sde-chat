@@ -81,7 +81,6 @@ public class EchoServer implements Observer, Console {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("Updated oberver method..." + arg);
         if(arg instanceof ModifiedObservableServer.Message) {
             ModifiedObservableServer.Message message = (ModifiedObservableServer.Message) arg;
             switch (message.getFunctionName()) {

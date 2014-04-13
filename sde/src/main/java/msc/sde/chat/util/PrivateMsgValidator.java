@@ -25,6 +25,11 @@ public class PrivateMsgValidator implements Validator {
         }
     }
 
+    @Override
+    public ValidateResult validate(EchoServer server, ConnectionToClient client, String[] params, boolean removeForwarding) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public static class PrivateMsgValidatorResult extends ValidateResult {
         public PrivateMsgValidatorResult(boolean valid, String returnMsg) {
             super(valid, returnMsg);
