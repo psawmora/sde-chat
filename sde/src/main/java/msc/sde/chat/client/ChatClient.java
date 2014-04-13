@@ -184,12 +184,12 @@ public class ChatClient implements Observer, Console {
     }
 
     private void removeForward(String[] params) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             try {
                 StringBuffer request = new StringBuffer(params[0]).
                         append(" ").
                         append(params[1]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -197,12 +197,12 @@ public class ChatClient implements Observer, Console {
     }
 
     private void deleteGroup(String[] params) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             try {
                 StringBuffer request = new StringBuffer(params[0]).
                         append(" ").
                         append(params[1]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -211,12 +211,12 @@ public class ChatClient implements Observer, Console {
     }
 
     private void forward(String[] params) {
-        if (isConnected()) {
+        if (client.isConnected()) {
             try {
                 StringBuffer request = new StringBuffer(params[0]).
                         append(" ").
                         append(params[1]);
-                sendToServer(request.toString());
+                client.sendToServer(request.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
