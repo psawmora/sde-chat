@@ -59,7 +59,7 @@ public class ChatClient implements Observer, Console {
 
     @Override
     public void update(Observable o, Object arg) {
-        if(arg instanceof String) {
+        if (arg instanceof String) {
             String message = (String) arg;
             switch (message) {
                 case ObservableClient.CONNECTION_ESTABLISHED:
@@ -177,9 +177,41 @@ public class ChatClient implements Observer, Console {
             case REMOVE_FORWARD:
                 removeForward(params);
                 break;
+            case REGISTER_AS_BUDDY:
+                registerBuddy(params);
+                break;
+            case DEREGISTER_AS_BUDDY:
+                deregisterBuddy(params);
+                break;
             default:
                 clientUI.display("Wrong command");
                 break;
+        }
+    }
+
+    private void deregisterBuddy(String[] params) {
+        if (client.isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                client.sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void registerBuddy(String[] params) {
+        if (client.isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                client.sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -275,7 +307,8 @@ public class ChatClient implements Observer, Console {
                         append(params[2]);
                 client.sendToServer(request.toString());
             } catch (Exception e) {
-                System.out.println("Error in sending private message: [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
+                System.out.println(
+                        "Error in sending private message: [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
             }
         } else {
             clientUI.display("Incorrect number of parameters for sending private message");
@@ -316,7 +349,8 @@ public class ChatClient implements Observer, Console {
                     clientUI.display("Connected to the server port[" + client.getPort() + "]");
                 }
             } catch (Exception e) {
-                System.out.println("Error in logging to the server : [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
+                System.out
+                        .println("Error in logging to the server : [" + client.getPort() + "] : [" + client.getHost() + "] " + e);
             }
         } else {
             clientUI.display("Incorrect number of parameters for logging");

@@ -19,12 +19,12 @@ public class LoginValidator implements Validator {
                 client.setInfo("loginId", userId);
                 clientDetails.setLoggedIn(true);
                 clientDetails.setConnectionToClient(client);
-                return new LoginValidatorResult(true, "Login success");
+                return new LoginValidatorResult(true, "Login success", userId);
             } else {
-                return new LoginValidatorResult(false, "Login failed");
+                return new LoginValidatorResult(false, "Login failed", userId);
             }
         } else {
-            return new LoginValidatorResult(false, "Incorrect parameter size");
+            return new LoginValidatorResult(false, "Incorrect parameter size", null);
         }
     }
 
@@ -35,8 +35,15 @@ public class LoginValidator implements Validator {
 
     public static class LoginValidatorResult extends ValidateResult {
 
-        public LoginValidatorResult(boolean valid, String returnMsg) {
+        private String userId;
+
+        public LoginValidatorResult(boolean valid, String returnMsg, String userId) {
             super(valid, returnMsg);
+            this.userId = userId;
+        }
+
+        public String getUserId() {
+            return userId;
         }
     }
 

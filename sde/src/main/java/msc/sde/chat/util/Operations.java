@@ -40,4 +40,8 @@ public class Operations {
     public final static String FORWARD = "forward";
 
     public final static String REMOVE_FORWARD = "removeforward";
+
+    public final static String REGISTER_AS_BUDDY = "registerbuddy";
+
+    public final static String DEREGISTER_AS_BUDDY = "deregisterbuddy";
 }

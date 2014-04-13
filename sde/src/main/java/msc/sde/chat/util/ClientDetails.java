@@ -22,10 +22,9 @@ public class ClientDetails {
 
     private List<String> groupIdList;
 
-    private String forwardId;
+    private List<String> budyIdList;
 
-    public ClientDetails() {
-    }
+    private String forwardId;
 
     public ClientDetails(String ip,
                          String userId,
@@ -38,13 +37,19 @@ public class ClientDetails {
         this.isLoggedIn = loggedIn;
         this.connectionToClient = connectionToClient;
         this.groupIdList = new ArrayList<>();
+        this.budyIdList = new ArrayList<>();
     }
 
-    public ClientDetails(String ip, String userId, String password) {
-        this.ip = ip;
-        this.userId = userId;
-        this.password = password;
-        this.groupIdList = new ArrayList<>();
+    public List<String> getBudyIdList() {
+        return budyIdList;
+    }
+
+    public void addToBuddyList(String userId) {
+        budyIdList.add(userId);
+    }
+
+    public void removeFromBuddyList(String userId) {
+        budyIdList.remove(userId);
     }
 
     public String getForwardId() {

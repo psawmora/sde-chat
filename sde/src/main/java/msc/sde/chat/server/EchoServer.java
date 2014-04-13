@@ -58,6 +58,8 @@ public class EchoServer implements Observer, Console {
 
     private ModifiedObservableServer server;
 
+    private BuddyServiceNValidator buddyValidatorNService;
+
     //Constructors ****************************************************
 
     /**
@@ -77,6 +79,7 @@ public class EchoServer implements Observer, Console {
         this.groupManager = new GroupManager(this);
         this.forwardValidator = new ForwardValidator();
         this.broadcastSenderService = new BroadcastSenderService(groupManager);
+        this.buddyValidatorNService = new BuddyServiceNValidator();
     }
 
     @Override
@@ -165,8 +168,24 @@ public class EchoServer implements Observer, Console {
 
     private void loginClient(ConnectionToClient client, String[] params) throws IOException {
         ValidateResult result = loginValidator.validate(this, client, params);
+        if (result.isValid()) {
+            String userId = ((LoginValidator.LoginValidatorResult) result).getUserId();
+            notifyToBuddyList(clientDetailsContainer.get(userId));
+        }
         client.sendToClient(result.getReturnMsg());
 
+    }
+
+    private void notifyToBuddyList(ClientDetails clientDetails) throws IOException {
+        if (clientDetails != null) {
+            String message = "your buddy " + clientDetails.getUserId() + " logged in";
+            for (String userId : clientDetails.getBudyIdList()) {
+                ClientDetails buddy = clientDetailsContainer.get(userId);
+                if (buddy != null && buddy.isLoggedIn()) {
+                    buddy.getConnectionToClient().sendToClient(message);
+                }
+            }
+        }
     }
 
     private void startIfNot() {
@@ -281,8 +300,16 @@ public class EchoServer implements Observer, Console {
                     case FORWARD:
                         forward(client, params);
                         break;
-                    case REMOVE_FORWARD :
-                        removeForward(client,params);
+                    case REMOVE_FORWARD:
+                        removeForward(client, params);
+                        break;
+                    case REGISTER_AS_BUDDY:
+                        registerAsBuddy(client, params);
+                        break;
+                    case DEREGISTER_AS_BUDDY:
+                        remoeAsBuddy(client, params);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -291,13 +318,23 @@ public class EchoServer implements Observer, Console {
         }
     }
 
+    private void remoeAsBuddy(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult result = buddyValidatorNService.deRegister(this, client, params);
+        client.sendToClient(result.getReturnMsg());
+    }
+
+    private void registerAsBuddy(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult result = buddyValidatorNService.register(this, client, params);
+        client.sendToClient(result.getReturnMsg());
+    }
+
     private void removeForward(ConnectionToClient client, String[] params) throws IOException {
         ValidateResult validate = forwardValidator.validate(this, client, params, false);
         client.sendToClient(validate.getReturnMsg());
     }
 
     private void deleteGroup(ConnectionToClient client, String[] params) throws IOException {
-        ValidateResult validate = groupManager.deleteGroup(client,params);
+        ValidateResult validate = groupManager.deleteGroup(client, params);
         client.sendToClient(validate.getReturnMsg());
     }
 
