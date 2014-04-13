@@ -8,6 +8,6 @@ import ocsf.server.ConnectionToClient;
  */
 public interface Validator {
 
-    ValidateResult validate(EchoServer server, ConnectionToClient client, String... prams);
+    ValidateResult validate(EchoServer server, ConnectionToClient client, String... params);
 
 }

@@ -4,6 +4,8 @@ package msc.sde.chat.server;// This file contains material supporting section 3.
 
 import msc.sde.chat.service.ConsoleObserver;
 import msc.sde.chat.service.display.ChatIF;
+import msc.sde.chat.service.send.SenderService;
+import msc.sde.chat.service.send.impl.PrivateMsgSenderService;
 import msc.sde.chat.util.*;
 import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
@@ -39,6 +41,10 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     private Validator loginValidator;
 
+    private Validator privateMsgValidator;
+
+    private SenderService privateMsgSenderService;
+
     private Map<String, ClientDetails> clientDetailsContainer;
 
     //Constructors ****************************************************
@@ -54,6 +60,8 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
         this.clientDetailsContainer = new HashMap<>();
         this.signUpValidator = new SignUpValidator();
         this.loginValidator = new LoginValidator();
+        this.privateMsgValidator = new PrivateMsgValidator();
+        this.privateMsgSenderService = new PrivateMsgSenderService();
     }
 
     @Override
@@ -201,10 +209,25 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                     case LOG_IN:
                         loginClient(client, params);
                         break;
+                    case PRIVATE_MSG:
+                        sendPrivateMsg(client, params);
+                        break;
                 }
             }
         } catch (Exception e) {
             System.out.println("Unexpected exception occurred while processing client message " + e);
+        }
+    }
+
+    private void sendPrivateMsg(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult result = privateMsgValidator.validate(this, client, params);
+        if (result.isValid()) {
+            String userId = params[1];
+            String msg = params[2];
+            privateMsgSenderService.send(this, client.getInfo("loginId") + ">" + msg, userId);
+            client.sendToClient(String.format("Private message sent to %s", userId));
+        } else {
+            client.sendToClient(result.getReturnMsg());
         }
     }
 
@@ -248,6 +271,14 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                 "Client [" + client.getId() + "] from [" + client.getInetAddress().getHostAddress() +
                         "] disconnected from the server");
 
+    }
+
+    @Override
+    protected synchronized void clientException(ConnectionToClient client, Throwable exception) {
+        String id = (String)client.getInfo("loginId");
+        clientDetailsContainer.get(id).setLoggedIn(false);
+        System.out.println(
+                "Client [" + id + "] disconnected from the server due to an exception");
     }
 
     public ClientDetails getClientDetails(String userId) {

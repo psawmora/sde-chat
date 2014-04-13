@@ -118,6 +118,9 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
             case LOG_OFF:
                 disconnect();
                 break;
+            case PRIVATE_MSG:
+                sendPrivateMsg(params);
+                break;
             case SET_HOST:
                 setUpHost(params);
                 break;
@@ -136,6 +139,23 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
             default:
                 clientUI.display("Wrong command");
                 break;
+        }
+    }
+
+    private void sendPrivateMsg(String[] params) {
+        if (params != null && params.length >= 3) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]).
+                        append(" ").
+                        append(params[2]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                System.out.println("Error in sending private message: [" + getPort() + "] : [" + getHost() + "] " + e);
+            }
+        } else {
+            clientUI.display("Incorrect number of parameters for sending private message");
         }
     }
 

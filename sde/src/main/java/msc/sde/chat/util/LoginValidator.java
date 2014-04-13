@@ -18,6 +18,7 @@ public class LoginValidator implements Validator {
                 client.setInfo("isLoggedIn", true);
                 client.setInfo("loginId", userId);
                 clientDetails.setLoggedIn(true);
+                clientDetails.setConnectionToClient(client);
                 return new LoginValidatorResult(true, "Login success");
             } else {
                 return new LoginValidatorResult(false, "Login failed");

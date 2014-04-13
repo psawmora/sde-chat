@@ -27,4 +27,6 @@ public class Operations {
 
     public final static String GET_HOST = "gethost";
 
+    public final static String PRIVATE_MSG = "private";
+
 }
