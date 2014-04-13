@@ -1,6 +1,7 @@
 package msc.sde.chat.service.display.impl;
 
 import msc.sde.chat.server.EchoServer;
+import msc.sde.chat.server.ModifiedConnectionToClientFactory;
 
 import static msc.sde.chat.server.EchoServer.DEFAULT_PORT;
 
@@ -17,6 +18,7 @@ public class ServerConsole extends AbstractConsole {
         }
         ServerConsole serverConsole = new ServerConsole();
         EchoServer server = new EchoServer(port, serverConsole);
+        server.setConnectionFactory(new ModifiedConnectionToClientFactory());
         serverConsole.setObserver(server);
         try {
             server.listen(); //Start listening for connections

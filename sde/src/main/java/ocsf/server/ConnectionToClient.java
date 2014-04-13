@@ -79,7 +79,7 @@ public class ConnectionToClient extends Thread {
 	 * @exception java.io.IOException
 	 *                if an I/O error occur when creating the connection.
 	 */
-	ConnectionToClient(ThreadGroup group, Socket clientSocket, AbstractServer server) throws IOException {
+	protected ConnectionToClient(ThreadGroup group, Socket clientSocket, AbstractServer server) throws IOException {
 		super(group, (Runnable) null);
 		// Initialize variables
 		this.clientSocket = clientSocket;

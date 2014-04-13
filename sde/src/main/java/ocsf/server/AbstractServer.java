@@ -79,6 +79,10 @@ public abstract class AbstractServer implements Runnable
    */
   private boolean readyToStop = false;
 
+  /**
+   * Connection factory that instantiate any type of ConnectionToClient objects.
+   */
+  private AbstractConnectionFactory connectionFactory;
 
 // CONSTRUCTOR ******************************************************
 
@@ -297,6 +301,16 @@ public abstract class AbstractServer implements Runnable
     this.backlog = backlog;
   }
 
+  /**
+   * Sets the user implemented connection factory.
+   * This should be called after server instance initiation.
+   *
+   * @param connectionFactory factory to create instances of type ConnectionToClient
+   */
+  public void setConnectionFactory(AbstractConnectionFactory connectionFactory) {
+      this.connectionFactory = connectionFactory;
+  }
+
 // RUN METHOD -------------------------------------------------------
 
   /**
@@ -324,8 +338,10 @@ public abstract class AbstractServer implements Runnable
 
           synchronized(this)
           {
-            ConnectionToClient c = new ConnectionToClient(
-              this.clientThreadGroup, clientSocket, this);
+            ConnectionToClient c =
+                    connectionFactory.createConnection(this.clientThreadGroup, clientSocket, this);
+//            ConnectionToClient c = new ConnectionToClient(
+//              this.clientThreadGroup, clientSocket, this);
           }
         }
         catch (InterruptedIOException exception)
