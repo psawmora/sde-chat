@@ -130,6 +130,15 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
             case LOG_IN:
                 login(params);
                 break;
+            case CREATE_GROUP:
+                createGroup(params);
+                break;
+            case ASSIGN_TO_GROUP:
+                assignToGroup(params);
+                break;
+            case RESIGN_FROM_GROUP:
+                resignFromGroup(params);
+                break;
             case GET_HOST:
                 clientUI.display("Host is : " + getHost());
                 break;
@@ -139,6 +148,47 @@ public class ChatClient extends AbstractClient implements ConsoleObserver {
             default:
                 clientUI.display("Wrong command");
                 break;
+        }
+    }
+
+    private void resignFromGroup(String[] params) {
+        if (isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void assignToGroup(String[] params) {
+        if (isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]).
+                        append(" ").
+                        append(params[2]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+    }
+
+    private void createGroup(String[] params) {
+        if (isConnected()) {
+            try {
+                StringBuffer request = new StringBuffer(params[0]).
+                        append(" ").
+                        append(params[1]);
+                sendToServer(request.toString());
+            } catch (Exception e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 

@@ -2,6 +2,9 @@ package msc.sde.chat.util;
 
 import ocsf.server.ConnectionToClient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author: prabath
  */
@@ -17,6 +20,10 @@ public class ClientDetails {
 
     private ConnectionToClient connectionToClient;
 
+    private List<String> groupIdList;
+
+    private String forwardId;
+
     public ClientDetails() {
     }
 
@@ -28,15 +35,32 @@ public class ClientDetails {
         this.ip = ip;
         this.userId = userId;
         this.password = password;
-        isLoggedIn = loggedIn;
+        this.isLoggedIn = loggedIn;
         this.connectionToClient = connectionToClient;
+        this.groupIdList = new ArrayList<>();
     }
 
     public ClientDetails(String ip, String userId, String password) {
-
         this.ip = ip;
         this.userId = userId;
         this.password = password;
+        this.groupIdList = new ArrayList<>();
+    }
+
+    public String getForwardId() {
+        return forwardId;
+    }
+
+    public void setForwardId(String forwardId) {
+        this.forwardId = forwardId;
+    }
+
+    public List<String> getGroupIdList() {
+        return groupIdList;
+    }
+
+    public void setGroupIdList(List<String> groupIdList) {
+        this.groupIdList = groupIdList;
     }
 
     public ConnectionToClient getConnectionToClient() {
@@ -77,5 +101,9 @@ public class ClientDetails {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public void addToGroupIdList(String groupId) {
+        groupIdList.add(groupId);
     }
 }

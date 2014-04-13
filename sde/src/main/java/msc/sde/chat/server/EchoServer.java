@@ -6,6 +6,8 @@ import msc.sde.chat.service.ConsoleObserver;
 import msc.sde.chat.service.display.ChatIF;
 import msc.sde.chat.service.send.SenderService;
 import msc.sde.chat.service.send.impl.PrivateMsgSenderService;
+import msc.sde.chat.service.group.GroupManager;
+import msc.sde.chat.service.send.BroadcastSenderService;
 import msc.sde.chat.util.*;
 import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
@@ -43,9 +45,15 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     private Validator privateMsgValidator;
 
+    private Validator forwardValidator;
+
     private SenderService privateMsgSenderService;
 
     private Map<String, ClientDetails> clientDetailsContainer;
+
+    private SenderService broadcastSenderService;
+
+    private GroupManager groupManager;
 
     //Constructors ****************************************************
 
@@ -62,6 +70,9 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
         this.loginValidator = new LoginValidator();
         this.privateMsgValidator = new PrivateMsgValidator();
         this.privateMsgSenderService = new PrivateMsgSenderService();
+        this.groupManager = new GroupManager(this);
+        this.forwardValidator = new ForwardValidator();
+        this.broadcastSenderService = new BroadcastSenderService(groupManager);
     }
 
     @Override
@@ -186,12 +197,16 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                     System.out.println(
                             "Exception in sending messages to the client[ " + client.getInetAddress().getHostAddress() + "]");
                 } finally {
-//
+                    //
                 }
             } else {
                 System.out.println("User Message: " + msg + " from " + loginId);
                 StringBuffer newMsg = new StringBuffer(loginId).append(">").append(msg);
-                sendToAllClients(newMsg.toString());
+                try {
+                    broadcastSenderService.send(this, loginId, newMsg.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
             }
 
         }
@@ -212,6 +227,18 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                     case PRIVATE_MSG:
                         sendPrivateMsg(client, params);
                         break;
+                    case CREATE_GROUP:
+                        handleCreateGroup(client, params);
+                        break;
+                    case ASSIGN_TO_GROUP:
+                        assignToGroup(client, params);
+                        break;
+                    case RESIGN_FROM_GROUP:
+                        resignFromGroup(client, params);
+                        break;
+                    case FORWARD:
+                        forward(client, params);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -219,16 +246,36 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
         }
     }
 
+    private void forward(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult validate = forwardValidator.validate(this, client, params);
+        client.sendToClient(validate.getReturnMsg());
+    }
+
     private void sendPrivateMsg(ConnectionToClient client, String[] params) throws IOException {
         ValidateResult result = privateMsgValidator.validate(this, client, params);
         if (result.isValid()) {
             String userId = params[1];
             String msg = params[2];
-            privateMsgSenderService.send(this, client.getInfo("loginId") + ">" + msg, userId);
+            privateMsgSenderService.send(this, userId, client.getInfo("loginId") + ">" + msg);
             client.sendToClient(String.format("Private message sent to %s", userId));
         } else {
             client.sendToClient(result.getReturnMsg());
         }
+    }
+
+    private void resignFromGroup(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult validateResult = groupManager.resignFromGroup(client, params);
+        client.sendToClient(validateResult.getReturnMsg());
+    }
+
+    private void assignToGroup(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult validateResult = groupManager.addClientToGroup(client, params);
+        client.sendToClient(validateResult.getReturnMsg());
+    }
+
+    private void handleCreateGroup(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult validateResult = groupManager.handleCreateGroup(client, params);
+        client.sendToClient(validateResult.getReturnMsg());
     }
 
     private void signUpClient(ConnectionToClient client, String[] params) throws IOException {
@@ -275,7 +322,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
 
     @Override
     protected synchronized void clientException(ConnectionToClient client, Throwable exception) {
-        String id = (String)client.getInfo("loginId");
+        String id = (String) client.getInfo("loginId");
         clientDetailsContainer.get(id).setLoggedIn(false);
         System.out.println(
                 "Client [" + id + "] disconnected from the server due to an exception");
@@ -294,7 +341,7 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
     }
 
     public boolean isContainsClientDetails(String userId) {
-        return clientDetailsContainer.containsKey(userId);
+        return userId == null ? false : clientDetailsContainer.containsKey(userId);
     }
 
 }

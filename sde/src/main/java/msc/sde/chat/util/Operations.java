@@ -29,4 +29,13 @@ public class Operations {
 
     public final static String PRIVATE_MSG = "private";
 
+    public final static String CREATE_GROUP = "creategroup";
+
+    public final static String ASSIGN_TO_GROUP = "assigntogroup";
+
+    public final static String RESIGN_FROM_GROUP = "resign";
+
+    public final static String DELETE_GROUP = "deletegroup";
+
+    public final static String FORWARD = "forward";
 }
