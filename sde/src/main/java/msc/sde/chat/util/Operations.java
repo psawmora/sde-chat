@@ -38,4 +38,6 @@ public class Operations {
     public final static String DELETE_GROUP = "deletegroup";
 
     public final static String FORWARD = "forward";
+
+    public final static String REMOVE_FORWARD = "removeforward";
 }

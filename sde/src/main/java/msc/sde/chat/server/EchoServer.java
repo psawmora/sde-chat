@@ -236,14 +236,30 @@ public class EchoServer extends AbstractServer implements ConsoleObserver {
                     case RESIGN_FROM_GROUP:
                         resignFromGroup(client, params);
                         break;
+                    case DELETE_GROUP:
+                        deleteGroup(client, params);
+                        break;
                     case FORWARD:
                         forward(client, params);
+                        break;
+                    case REMOVE_FORWARD :
+                        removeForward(client,params);
                         break;
                 }
             }
         } catch (Exception e) {
             System.out.println("Unexpected exception occurred while processing client message " + e);
         }
+    }
+
+    private void removeForward(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult validate = forwardValidator.validate(this, client, params, false);
+        client.sendToClient(validate.getReturnMsg());
+    }
+
+    private void deleteGroup(ConnectionToClient client, String[] params) throws IOException {
+        ValidateResult validate = groupManager.deleteGroup(client,params);
+        client.sendToClient(validate.getReturnMsg());
     }
 
     private void forward(ConnectionToClient client, String[] params) throws IOException {

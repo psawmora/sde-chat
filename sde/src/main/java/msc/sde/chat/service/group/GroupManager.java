@@ -86,6 +86,28 @@ public class GroupManager {
         return new GroupManagerValidateResult(false, "Resigning from the group is a failure");
     }
 
+    public ValidateResult deleteGroup(ConnectionToClient client, String[] params) {
+        boolean isLoggedIn = client.getInfo("isLoggedIn") == null ? false : (Boolean) client.getInfo("isLoggedIn");
+        String userId = (String) client.getInfo("loginId");
+        if (isLoggedIn && params != null && params.length >= 2) {
+            String grpId = params[1];
+            Group group = groupContainer.get(grpId);
+            if (group != null && group.getOwnerId().equals(userId)) {
+                boolean isSuccess = removeUsersFromGroup(group, server, grpId);
+                return new GroupManagerValidateResult(isSuccess, "Deleting group is " + isSuccess);
+            }
+        }
+        return new GroupManagerValidateResult(false, "Deleting group is not  success");
+    }
+
+    private boolean removeUsersFromGroup(Group group, EchoServer server, String grpId) {
+        for (String memeber : group.memeberList) {
+            server.getClientDetails(memeber).getGroupIdList().remove(grpId);
+        }
+        group.memeberList.clear();
+        return true;
+    }
+
     public Group getGroupForId(String groupId) {
         return groupContainer.get(groupId);
     }
