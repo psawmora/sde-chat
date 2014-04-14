@@ -1,41 +1,59 @@
-Command List ->
 
-Signing Up                        ->  signup <user_name> <password> <confirm_password>
+Background
+==========
 
-Quitting the system               ->  quit
+Implemented requirements for Group Projects 2,3,4.
 
-Stopping the system               ->  stop
+Relevant features are described as follows:
+    1. Sign-up and Login using password.
+    2. Client user can send private messages.
+    3. Chat group/channel feature added.
+    4. Message forwarding
+    5. Extension for the framework:
+        5.1 Addition of a Factory to handle client connections
+        5.2 Addition of an observable layer
+        5.3 Code base is modified in order to use above two extensions
+    6. Buddy-list capability added.
 
-Closing                           ->  close
+Commands
+========
 
-Setting the port                  ->  setport <port>
+Signing Up                        ->  #signup <user_name> <password> <confirm_password>
 
-Setting the host                  ->  sethost <host>
+Quitting the system               ->  #quit
 
-Start                             ->  start
+Stopping the system               ->  #stop
 
-Get the port                      ->  getport
+Closing                           ->  #close
 
-Get the host                      ->  gethost
+Setting the port                  ->  #setport <port>
 
-Logoff                            ->  logoff
+Setting the host                  ->  #sethost <host>
 
-Login                             ->  login
+Start                             ->  #start
 
-Sending private message           ->  private <recipient> <msg>
+Get the port                      ->  #getport
 
-Creating a group(Channel)         ->  creategroup <group_name>
+Get the host                      ->  #gethost
 
-Assign a client to a group        ->  assigntogroup <group_name> <client_id>
+Logoff                            ->  #logoff
 
-Resigning from a group            ->  resign <group_name>
+Login                             ->  #login
 
-Deleting a group                  ->  deletegroup <group_name>
+Sending private message           ->  #private <recipient> <msg>
 
-Setup message forward             ->  forward <client_to_which_forward_messages_to>
+Creating a group(Channel)         ->  #creategroup <group_name>
 
-Remove forward                    ->  removeforward <client_to_which_forward_messages_to>
+Assign a client to a group        ->  #assigntogroup <group_name> <client_id>
 
-Register as a buddy               ->  registerbuddy <buddy_client_id>
+Resigning from a group            ->  #resign <group_name>
 
-Unsigned as a buddy from          ->  deregisterbuddy <buddy_client_id>
+Deleting a group                  ->  #deletegroup <group_name>
+
+Setup message forward             ->  #forward <client_to_which_forward_messages_to>
+
+Remove forward                    ->  #removeforward <client_to_which_forward_messages_to>
+
+Register as a buddy               ->  #registerbuddy <buddy_client_id>
+
+Unsigned as a buddy from          ->  #deregisterbuddy <buddy_client_id>
