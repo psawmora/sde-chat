@@ -1,3 +1,21 @@
+How to start
+============
+
+Server - Go to 'sde/src/main/java/msc/sde/chat/service/display/impl'
+         and run main method in 'ServerConsole'
+
+Client - Go to 'sde/src/main/java/msc/sde/chat/service/display/impl'
+         and run main method in 'ClientConsole'
+
+Typical initial commands to test the flow
+==========================================
+
+    #signup <username> <password>
+    #login <username> <password>
+    If you want to send messages to all clients, just type the message and enter.
+    If you want to send a private message to a specific client use command:
+        #private <receiver-username> <message>
+    Look for 'Commands' section to get details of all the commands.
 
 Background
 ==========
