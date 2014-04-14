@@ -1,0 +1,41 @@
+Command List ->
+
+Signing Up                        ->  signup <user_name> <password> <confirm_password>
+
+Quitting the system               ->  quit
+
+Stopping the system               ->  stop
+
+Closing                           ->  close
+
+Setting the port                  ->  setport <port>
+
+Setting the host                  ->  sethost <host>
+
+Start                             ->  start
+
+Get the port                      ->  getport
+
+Get the host                      ->  gethost
+
+Logoff                            ->  logoff
+
+Login                             ->  login
+
+Sending private message           ->  private <recipient> <msg>
+
+Creating a group(Channel)         ->  creategroup <group_name>
+
+Assign a client to a group        ->  assigntogroup <group_name> <client_id>
+
+Resigning from a group            ->  resign <group_name>
+
+Deleting a group                  ->  deletegroup <group_name>
+
+Setup message forward             ->  forward <client_to_which_forward_messages_to>
+
+Remove forward                    ->  removeforward <client_to_which_forward_messages_to>
+
+Register as a buddy               ->  registerbuddy <buddy_client_id>
+
+Unsigned as a buddy from          ->  deregisterbuddy <buddy_client_id>
