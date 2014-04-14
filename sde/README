@@ -3,9 +3,12 @@ How to start
 
 Server - Go to 'sde/src/main/java/msc/sde/chat/service/display/impl'
          and run main method in 'ServerConsole'
+         (Typically open the project from your favourite IDE and run the main method of 'ServerConsole' class.)
 
 Client - Go to 'sde/src/main/java/msc/sde/chat/service/display/impl'
          and run main method in 'ClientConsole'
+         Multiple instances of clients can be started and you can simulate chat room environment.
+         (Typically open the project from your favourite IDE and run the main method of 'ClientConsole' class.)
 
 Typical initial commands to test the flow
 ==========================================
