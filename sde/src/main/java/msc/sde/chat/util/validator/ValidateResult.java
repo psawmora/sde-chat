@@ -1,4 +1,4 @@
-package msc.sde.chat.util;
+package msc.sde.chat.util.validator;
 
 /**
  * @author: prabath

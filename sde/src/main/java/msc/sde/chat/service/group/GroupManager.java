@@ -3,7 +3,7 @@ package msc.sde.chat.service.group;
 import msc.sde.chat.server.EchoServer;
 import msc.sde.chat.service.send.SenderService;
 import msc.sde.chat.util.ClientDetails;
-import msc.sde.chat.util.ValidateResult;
+import msc.sde.chat.util.validator.ValidateResult;
 import ocsf.server.ConnectionToClient;
 
 import java.io.IOException;

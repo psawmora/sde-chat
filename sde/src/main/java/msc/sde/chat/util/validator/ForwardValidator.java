@@ -1,4 +1,4 @@
-package msc.sde.chat.util;
+package msc.sde.chat.util.validator;
 
 import msc.sde.chat.server.EchoServer;
 import ocsf.server.ConnectionToClient;
